@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FORTYSEVEN!</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('https://images.unsplash.com/photo-1564186763535-ebb21ef5277f?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+            background-size: cover;
+            background-position: center;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            text-align: center;
+            max-width: 90%;
+            width: 800px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007BFF;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            padding: 30px 40px;
+            margin: 20px;
+            cursor: pointer;
+            font-size: 32px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #blinker {
+            width: 80px;
+            height: 80px;
+            background-color: red;
+            border-radius: 50%;
+            opacity: 1;
+            transition: opacity 0.1s;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 20px;
+        }
+        input[type="number"] {
+            width: 200px;
+            padding: 20px;
+            font-size: 40px;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+        }
+        .button-row {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .button-row button {
+            margin: 20px;
+            flex: 1;
+        }
+        .start-stop-button {
+            background-color: #28a745;
+            border: none;
+            border-radius: 50%;
+            color: white;
+            padding: 60px;
+            width: 200px;
+            height: 200px;
+            font-size: 48px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .start-stop-button:hover {
+            background-color: #218838;
+        }
+        @media (max-width: 600px) {
+            button {
+                padding: 24px;
+                font-size: 28px;
+            }
+            #blinker {
+                width: 60px;
+                height: 60px;
+            }
+            input[type="number"] {
+                width: 160px;
+                font-size: 32px;
+                padding: 16px;
+            }
+            .start-stop-button {
+                width: 160px;
+                height: 160px;
+                font-size: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <audio id="metronome-click">
+            <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg">
+            Dein Browser unterstützt das Audio-Format nicht.
+        </audio>
+        <h1>FORTYSEVEN!</h1>
+        <div style="display: flex; align-items: center; justify-content: center;">
+            <input type="number" id="bpm" value="120" min="1" step="1"> BPM
+            <div id="blinker"></div>
+        </div>
+        <div class="button-group">
+            <div class="button-row">
+                <button onclick="changeBPM(-1)">-1 BPM</button>
+                <button onclick="changeBPM(1)">+1 BPM</button>
+            </div>
+            <div class="button-row">
+                <button onclick="changeBPM(-5)">-5 BPM</button>
+                <button onclick="changeBPM(5)">+5 BPM</button>
+            </div>
+        </div>
+        <button id="start-stop-button" class="start-stop-button" onclick="toggleMetronome()">Start</button>
+    </div>
+
+    <script>
+    var metronomeInterval;
+    var blinkInterval;
+    var audio = document.getElementById('metronome-click');
+    var isRunning = false;
+
+    function startMetronome() {
+        var bpm = parseInt(document.getElementById('bpm').value, 10);
+        if (isNaN(bpm) || bpm <= 0) {
+            alert('Bitte geben Sie eine gültige BPM ein.');
+            return;
+        }
+        var interval = 60000 / bpm;
+        
+        stopMetronome();
+
+        metronomeInterval = setInterval(function() {
+            audio.currentTime = 0;
+            audio.play().catch(error => {
+                console.error('Fehler beim Abspielen des Tons:', error);
+            });
+        }, interval);
+
+        blinkInterval = setInterval(function() {
+            var blinker = document.getElementById('blinker');
+            blinker.style.opacity = (blinker.style.opacity == 1 ? 0 : 1);
+        }, interval / 2);
+    }
+
+    function stopMetronome() {
+        clearInterval(metronomeInterval);
+        clearInterval(blinkInterval);
+        document.getElementById('blinker').style.opacity = 1;
+    }
+
+    function setBPM(bpm) {
+        document.getElementById('bpm').value = bpm;
+        if (isRunning) {
+            startMetronome();
+        }
+    }
+
+    function changeBPM(change) {
+        var bpmInput = document.getElementById('bpm');
+        var bpm = parseInt(bpmInput.value, 10);
+        if (!isNaN(bpm) && bpm + change > 0) {
+            setBPM(bpm + change);
+        }
+    }
+
+    function toggleMetronome() {
+        if (isRunning) {
+            stopMetronome();
+            document.getElementById('start-stop-button').innerText = 'Start';
+        } else {
+            startMetronome();
+            document.getElementById('start-stop-button').innerText = 'Stop';
+        }
+        isRunning = !isRunning;
+    }
+
+    window.onload = function() {
+        var bpm = getBPMFromURL();
+        if (bpm) {
+            setBPM(bpm);
+        }
+    };
+
+    function getBPMFromURL() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const bpm = urlParams.get('bpm');
+        return bpm ? parseInt(bpm, 10) : null;
+    }
+    </script>
+</body>
+</html>
